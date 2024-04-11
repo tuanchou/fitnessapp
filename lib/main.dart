@@ -1,9 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fitness/forgot_password.dart';
-import 'package:fitness/home_screen.dart';
-import 'package:fitness/login.dart';
-import 'package:fitness/profile.dart';
-import 'package:fitness/signup.dart';
+import 'package:fitness/view/dashboard.dart';
+import 'package:fitness/view/forgot_password.dart';
+import 'package:fitness/view/home_screen.dart';
+import 'package:fitness/view/login.dart';
+import 'package:fitness/view/profile/profile.dart';
+import 'package:fitness/view/signup.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -11,7 +12,7 @@ void main() async {
   await Firebase.initializeApp();
   runApp(SafeArea(
       child: MaterialApp(
-    initialRoute: 'login',
+    initialRoute: 'dashboard',
     debugShowCheckedModeBanner: false,
     routes: {
       'login': (context) => const LogIn(),
@@ -19,6 +20,7 @@ void main() async {
       'home': (context) => const HomeScreen(),
       'profile': (context) => const Profile(),
       'forgotpassword': (context) => const ForgotPassword(),
+      'dashboard': (context) => const DashboardScreen(),
     },
   )));
 }
