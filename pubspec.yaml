@@ -48,6 +48,8 @@ dependencies:
   dotted_dashed_line: ^0.0.3
   simple_circular_progress_bar: ^1.0.2
   animated_toggle_switch: ^0.8.2
+  video_player: ^2.8.5
+  readmore: ^3.0.0
 
 dev_dependencies:
   flutter_test:

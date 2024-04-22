@@ -4,6 +4,7 @@ import 'package:fitness/view/activity.dart';
 import 'package:fitness/view/home_screen.dart';
 import 'package:fitness/view/profile/profile_interface.dart';
 import 'package:fitness/view/social.dart';
+import 'package:fitness/view/workourStatistic/Statistic.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(),
     const Activity(),
-    const Social(),
+    const Statistic(),
     const UserProfile()
   ];
 

@@ -18,15 +18,6 @@ class WorkoutRow extends StatelessWidget {
             boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)]),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: Image.asset(
-                wObj["image"].toString(),
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
             const SizedBox(
               width: 15,
             ),
