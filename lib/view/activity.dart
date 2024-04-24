@@ -1,3 +1,6 @@
+import 'package:fitness/service/videoplayerwidget.dart';
+import 'package:fitness/view/addData.dart';
+import 'package:fitness/view/workour/workour_detail_view.dart';
 import 'package:flutter/material.dart';
 
 class Activity extends StatefulWidget {
@@ -10,6 +13,6 @@ class Activity extends StatefulWidget {
 class _ActivityState extends State<Activity> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return MainScreen();
   }
 }

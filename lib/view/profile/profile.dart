@@ -6,7 +6,6 @@ import 'package:fitness/service/round_button.dart';
 import 'package:fitness/service/round_gradient_button.dart';
 import 'package:fitness/service/round_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
