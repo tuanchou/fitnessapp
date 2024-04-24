@@ -1,12 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/service/app_colors.dart';
+import 'package:fitness/service/round_gradient_button.dart';
 import 'package:fitness/service/workout_row.dart';
-import 'package:fitness/view/workourStatistic/finish_workout_screen.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fitness/view/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class Statistic extends StatefulWidget {
-  static String routeName = "/HomeScreen";
-
   const Statistic({Key? key}) : super(key: key);
 
   @override
@@ -14,104 +14,74 @@ class Statistic extends StatefulWidget {
 }
 
 class _StatisticState extends State<Statistic> {
-  List lastWorkoutArr = [
-    {"name": "Full Body Workout", "kcal": "180", "time": "20", "progress": 0.3},
-    {
-      "name": "Lower Body Workout",
-      "kcal": "200",
-      "time": "30",
-      "progress": 0.4
-    },
-    {"name": "Ab Workout", "kcal": "300", "time": "40", "progress": 0.7},
-  ];
-
+  User? user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.whiteColor,
+        centerTitle: true,
+        elevation: 0,
+        title: const Text(
+          "Progress",
+          style: TextStyle(
+              color: AppColors.blackColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700),
+        ),
+      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('userProgress')
+              .doc(user?.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(); // Placeholder widget while loading
+            }
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Latest Workout",
-                      style: TextStyle(
-                          color: AppColors.blackColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700),
+                      "It looks like you haven't done any exercises.",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Let's start practicing",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: RoundGradientButton(
+                        title: "Start",
+                        onPressed: () {
+                          Navigator.pushNamed(context, 'dashboard');
+                        },
+                      ),
                     ),
                   ],
                 ),
-                ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: lastWorkoutArr.length,
-                    itemBuilder: (context, index) {
-                      var wObj = lastWorkoutArr[index] as Map? ?? {};
-                      return InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                                context, FinishWorkoutScreen.routeName);
-                          },
-                          child: WorkoutRow(wObj: wObj));
-                    }),
-                SizedBox(
-                  height: media.width * 0.1,
-                ),
-              ],
-            ),
-          ),
+              );
+            }
+            // Here you can access your Firestore data
+            var wObj = snapshot.data!.data() as Map<String, dynamic>;
+            return ListView.builder(
+              itemCount: 1, // Chỉ có một tài liệu nên itemCount là 1
+              itemBuilder: (context, index) {
+                return WorkoutRow(wObj: wObj);
+              },
+            );
+          },
         ),
       ),
     );
-  }
-
-  SideTitles get rightTitles => SideTitles(
-        getTitlesWidget: rightTitleWidgets,
-        showTitles: true,
-        interval: 20,
-        reservedSize: 40,
-      );
-
-  Widget rightTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = '0%';
-        break;
-      case 20:
-        text = '20%';
-        break;
-      case 40:
-        text = '40%';
-        break;
-      case 60:
-        text = '60%';
-        break;
-      case 80:
-        text = '80%';
-        break;
-      case 100:
-        text = '100%';
-        break;
-      default:
-        return Container();
-    }
-
-    return Text(text,
-        style: TextStyle(
-          color: AppColors.grayColor,
-          fontSize: 12,
-        ),
-        textAlign: TextAlign.center);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/service/round_button.dart';
+import 'package:fitness/view/social/widget/upload_post_main_widget.dart';
 import 'package:flutter/material.dart';
 
 class Social extends StatefulWidget {
@@ -307,14 +308,10 @@ class _SocialState extends State<Social> {
       ),
       floatingActionButton: InkWell(
         onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => SleepAddAlarmView(
-          //       date: _selectedDateAppBBar,
-          //     ),
-          //   ),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UploadPostMainWidget()),
+          );
         },
         child: Container(
           width: 55,

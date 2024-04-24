@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/service/round_gradient_button.dart';
 import 'package:fitness/service/round_iconbutton.dart';
@@ -11,7 +13,11 @@ import 'package:readmore/readmore.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
   final Map eObj;
-  const ExercisesStepDetails({Key? key, required this.eObj}) : super(key: key);
+  final String collectionName;
+
+  const ExercisesStepDetails(
+      {Key? key, required this.eObj, required this.collectionName})
+      : super(key: key);
 
   @override
   State<ExercisesStepDetails> createState() => _ExercisesStepDetailsState();
@@ -21,6 +27,10 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
   late int timeInSeconds = 20; // Thời gian ban đầu là 20 giây
   late Timer? timer; // Biến đếm ngược
   bool isTimerInitialized = false;
+  User? user = FirebaseAuth.instance.currentUser;
+
+  final CollectionReference _userprogress =
+      FirebaseFirestore.instance.collection('userProgress');
 
   @override
   void dispose() {
@@ -37,11 +47,48 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
         if (timeInSeconds > 0) {
           timeInSeconds--;
         } else {
-          timer.cancel(); // Hủy timer khi thời gian đếm ngược đạt 0
+          timer.cancel();
+          onTimerFinished(); // Hủy timer khi thời gian đếm ngược đạt 0
         }
       });
     });
     isTimerInitialized = true;
+  }
+
+  Future<void> onTimerFinished() async {
+    QuerySnapshot collectionSnapshot = await FirebaseFirestore.instance
+        .collection(widget.collectionName)
+        .get();
+    int totalItems = collectionSnapshot.docs.length;
+    double percentageForEachItem = 100 / totalItems;
+
+    DocumentSnapshot userDoc = await _userprogress.doc(user?.uid).get();
+    if (userDoc.exists) {
+      final userData = userDoc.data() as Map<String, dynamic>;
+      double currentPercentage = 0.0; // Khởi tạo currentPercentage
+      double newPercentage = 0.0; // Khởi tạo newPercentage
+      if (userData != null && userData.containsKey(widget.collectionName)) {
+        currentPercentage = userData[widget
+            .collectionName]; // Lấy giá trị hiện tại của widget.collectionName
+        newPercentage =
+            currentPercentage + percentageForEachItem; // Tính toán giá trị mới
+        await _userprogress.doc(user?.uid).update({
+          widget.collectionName: newPercentage,
+        });
+      } else {
+        newPercentage =
+            percentageForEachItem; // Nếu trường chưa tồn tại, giá trị mới sẽ là percentageForEachItem
+        await _userprogress.doc(user?.uid).set({
+          widget.collectionName: newPercentage,
+        }, SetOptions(merge: true));
+      }
+    } else {
+      double newPercentage = percentageForEachItem;
+      await _userprogress.doc(user?.uid).set({
+        widget.collectionName:
+            newPercentage, // Thiết lập giá trị cho trường có tên là widget.collectionName
+      });
+    }
   }
 
   @override
@@ -175,7 +222,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                   onPressed: () {
                     setState(() {
                       timeInSeconds =
-                          20; // Reset thời gian về 20 giây khi nút được nhấn
+                          5; // Reset thời gian về 20 giây khi nút được nhấn
                     });
                     startTimer();
                   },

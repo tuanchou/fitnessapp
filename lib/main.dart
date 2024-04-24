@@ -12,7 +12,7 @@ void main() async {
   await Firebase.initializeApp();
   runApp(SafeArea(
       child: MaterialApp(
-    initialRoute: 'dashboard',
+    initialRoute: 'login',
     debugShowCheckedModeBanner: false,
     routes: {
       'login': (context) => const LogIn(),
