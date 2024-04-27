@@ -107,58 +107,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
     bool isDone = false;
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.whiteColor,
-        centerTitle: true,
-        elevation: 0,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            height: 40,
-            width: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: AppColors.lightGrayColor,
-                borderRadius: BorderRadius.circular(10)),
-            child: Image.asset(
-              "icons/back_icon.png",
-              width: 15,
-              height: 15,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        title: Text(
-          "Workout Schedule",
-          style: TextStyle(
-              color: AppColors.blackColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700),
-        ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: AppColors.lightGrayColor,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "icons/more_icon.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -421,8 +369,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => WorkoutDetailView(
-                            collectionName:
-                                eventName, // Truyền tên collection 'chest' vào WorkoutDetailView
+                            collectionName: eventName,
                           ),
                         ),
                       );

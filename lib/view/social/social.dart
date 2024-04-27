@@ -84,18 +84,6 @@ class _SocialState extends State<Social> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.whiteColor,
-        centerTitle: true,
-        elevation: 0,
-        title: const Text(
-          "My Activity",
-          style: TextStyle(
-              color: AppColors.blackColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700),
-        ),
-      ),
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance

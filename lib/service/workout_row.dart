@@ -1,3 +1,4 @@
+import 'package:fitness/service/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness/view/workour/workour_detail_view.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
@@ -17,8 +18,9 @@ class WorkoutRow extends StatelessWidget {
           Card(
             elevation: 2, // Độ đổ bóng
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20), // Bo tròn viền
+              borderRadius: BorderRadius.circular(30), // Bo tròn viền
             ),
+            color: Color.fromARGB(255, 169, 207, 245),
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
             child: Padding(
               padding: const EdgeInsets.all(15),
@@ -56,11 +58,11 @@ class WorkoutRow extends StatelessWidget {
                     direction: Axis.horizontal,
                     curve: Curves.fastLinearToSlowEaseIn,
                     duration: const Duration(seconds: 3),
-                    borderRadius: BorderRadius.circular(7.5),
+                    borderRadius: BorderRadius.circular(20),
                     gradientColor: LinearGradient(
                       colors: [
-                        Color.fromARGB(255, 93, 152, 233),
-                        Color.fromARGB(255, 55, 49, 163)
+                        AppColors.primaryColor1,
+                        AppColors.secondaryColor1
                       ], // Chỉ là ví dụ, bạn có thể thay đổi gradient tùy theo nhu cầu
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
