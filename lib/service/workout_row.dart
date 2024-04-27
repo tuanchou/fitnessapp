@@ -34,7 +34,7 @@ class WorkoutRow extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${(wObj[fieldName] as double).toStringAsFixed(0)}%', // Làm tròn giá trị và thêm ký tự "%"
+                          '${(wObj[fieldName] is double ? wObj[fieldName] as double : (wObj[fieldName] as int).toDouble()).toStringAsFixed(0)}%',
                           style: TextStyle(color: Colors.black, fontSize: 16),
                         ),
                         const SizedBox(height: 4),
@@ -47,9 +47,12 @@ class WorkoutRow extends StatelessWidget {
                         0.5, // Điều chỉnh chiều rộng tùy theo nhu cầu
                     backgroundColor: Colors.grey.shade100,
                     foregrondColor: Color.fromARGB(255, 169, 9, 9),
-                    ratio:
-                        (wObj[fieldName] as double? ?? 0.0).clamp(10.0, 100.0) /
-                            100.0,
+                    ratio: ((wObj[fieldName] is double
+                                ? wObj[fieldName]
+                                : (wObj[fieldName] as int).toDouble())
+                            .clamp(10.0, 100.0) /
+                        100.0),
+
                     direction: Axis.horizontal,
                     curve: Curves.fastLinearToSlowEaseIn,
                     duration: const Duration(seconds: 3),

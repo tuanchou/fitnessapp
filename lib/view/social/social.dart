@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/service/round_button.dart';
+import 'package:fitness/service/round_gradient_button.dart';
+import 'package:fitness/service/workout_row.dart';
 import 'package:fitness/view/social/widget/upload_post_main_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +15,50 @@ class Social extends StatefulWidget {
 }
 
 class _SocialState extends State<Social> {
+  List<String> userPostImageUrls = [];
+  Map<String, List<String>> imagesByMonth = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserPosts();
+  }
+
+  Future<void> _getUserPosts() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        QuerySnapshot userPostsSnapshot = await FirebaseFirestore.instance
+            .collection('posts')
+            .where('creatorUid', isEqualTo: user.uid)
+            .get();
+
+        imagesByMonth = _classifyImagesByMonth(userPostsSnapshot);
+
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error fetching user posts: $e');
+    }
+  }
+
+  Map<String, List<String>> _classifyImagesByMonth(QuerySnapshot snapshot) {
+    Map<String, List<String>> classifiedImages = {};
+
+    snapshot.docs.forEach((postDoc) {
+      Timestamp timestamp = postDoc['createAt'];
+      DateTime dateTime = timestamp.toDate();
+      String monthYear = '${dateTime.month}/${dateTime.year}';
+
+      if (!classifiedImages.containsKey(monthYear)) {
+        classifiedImages[monthYear] = [];
+      }
+      classifiedImages[monthYear]!.add(postDoc['postImageUrl']);
+    });
+
+    return classifiedImages;
+  }
+
   List photoArr = [
     {
       "time": "2 June",
@@ -31,304 +79,147 @@ class _SocialState extends State<Social> {
       ]
     }
   ];
-
+  User? user = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.whiteColor,
         centerTitle: true,
         elevation: 0,
-        leadingWidth: 0,
-        leading: const SizedBox(),
-        title: Text(
-          "Progress Photo",
+        title: const Text(
+          "My Activity",
           style: TextStyle(
               color: AppColors.blackColor,
               fontSize: 16,
               fontWeight: FontWeight.w700),
         ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: AppColors.lightGrayColor,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "icons/more_icon.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
       ),
-      backgroundColor: AppColors.whiteColor,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
+      body: SafeArea(
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('userProgress')
+              .doc(user?.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child:
+                      CircularProgressIndicator()); // Placeholder widget while loading
+            }
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "It looks like you haven't done any exercises.",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Let's start practicing",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: RoundGradientButton(
+                        title: "Start",
+                        onPressed: () {
+                          Navigator.pushNamed(context, 'dashboard');
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            // Here you can access your Firestore data
+            var wObj = snapshot.data!.data() as Map<String, dynamic>;
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                        color: const Color(0xffFFE5E5),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              color: AppColors.whiteColor,
-                              borderRadius: BorderRadius.circular(30)),
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            "icons/date_notifi.png",
-                            width: 30,
-                            height: 30,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Reminder!",
-                                  style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                Text(
-                                  "Next Photos Fall On July 08",
-                                  style: TextStyle(
-                                      color: AppColors.blackColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                              ]),
-                        ),
-                        Container(
-                            height: 60,
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.close,
-                                  color: AppColors.grayColor,
-                                  size: 15,
-                                )))
-                      ],
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Progess",
+                    style: TextStyle(
+                      color: AppColors.blackColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
+                SizedBox(height: 8),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.all(20),
-                    height: media.width * 0.4,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [
-                          AppColors.primaryColor2.withOpacity(0.4),
-                          AppColors.primaryColor1.withOpacity(0.4)
-                        ]),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Text(
-                                "Track Your Progress Each\nMonth With Photo",
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const Spacer(),
-                              SizedBox(
-                                width: 110,
-                                height: 35,
-                                child: RoundButton(
-                                    title: "Learn More", onPressed: () {}),
-                              )
-                            ]),
-                        Image.asset(
-                          "images/progress_each_photo.png",
-                          width: media.width * 0.35,
-                        )
-                      ],
-                    ),
-                  ),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: WorkoutRow(wObj: wObj),
                 ),
                 SizedBox(
-                  height: media.width * 0.05,
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor2.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Compare my Photo",
-                        style: TextStyle(
-                            color: AppColors.blackColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      SizedBox(
-                        width: 100,
-                        height: 25,
-                        child: RoundButton(
-                          title: "Compare",
-                          onPressed: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //     const ComparisonView(),
-                            //   ),
-                            // );
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+                    height:
+                        20), // Adding some space between WorkoutRow and photoArr
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Gallery",
-                        style: TextStyle(
-                            color: AppColors.blackColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
-                      ),
-                      TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "See more",
-                            style: TextStyle(
-                                color: AppColors.grayColor, fontSize: 12),
-                          ))
-                    ],
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Gallery",
+                    style: TextStyle(
+                      color: AppColors.blackColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                ListView.builder(
+                SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: photoArr.length,
-                    itemBuilder: ((context, index) {
-                      var pObj = photoArr[index] as Map? ?? {};
-                      var imaArr = pObj["photo"] as List? ?? [];
-
+                    itemCount: imagesByMonth.length,
+                    itemBuilder: (context, index) {
+                      String monthYear = imagesByMonth.keys.toList()[index];
+                      List<String> images = imagesByMonth[monthYear] ?? [];
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              pObj["time"].toString(),
+                              monthYear,
                               style: TextStyle(
-                                  color: AppColors.grayColor, fontSize: 12),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          SizedBox(
-                            height: 100,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.zero,
-                              itemCount: imaArr.length,
-                              itemBuilder: ((context, indexRow) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.lightGrayColor,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      imaArr[indexRow] as String? ?? "",
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                );
-                              }),
+                          SizedBox(height: 8),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: images
+                                  .map((imageUrl) => Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Image.network(
+                                          imageUrl,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ))
+                                  .toList(),
                             ),
                           ),
                         ],
                       );
-                    }))
+                    },
+                  ),
+                ),
               ],
-            ),
-            SizedBox(
-              height: media.width * 0.05,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => UploadPostMainWidget()),
-          );
-        },
-        child: Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-              gradient: LinearGradient(colors: AppColors.secondaryG),
-              borderRadius: BorderRadius.circular(27.5),
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
-              ]),
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.photo_camera,
-            size: 20,
-            color: AppColors.whiteColor,
-          ),
+            );
+          },
         ),
       ),
     );

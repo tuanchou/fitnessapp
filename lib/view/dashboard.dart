@@ -8,6 +8,7 @@ import 'package:fitness/view/social/social.dart';
 import 'package:fitness/view/social/upload_post_page.dart';
 import 'package:fitness/view/social/widget/upload_post_main_widget.dart';
 import 'package:fitness/view/workourStatistic/Statistic.dart';
+import 'package:fitness/view/workout_schedule_view/workout_schedule_view.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -24,9 +25,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(),
+    const Social(),
     const HomePage(),
-    const UploadPostMainWidget(),
-    const UserProfile()
+    const WorkoutScheduleView()
   ];
 
   @override

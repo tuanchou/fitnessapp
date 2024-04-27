@@ -1,3 +1,4 @@
+import 'package:fitness/view/social/comments/comment_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -6,8 +7,12 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class SinglePostCardWidget extends StatelessWidget {
   final Map<String, dynamic> wObj;
-
-  const SinglePostCardWidget({Key? key, required this.wObj}) : super(key: key);
+  final String postId;
+  const SinglePostCardWidget({
+    Key? key,
+    required this.wObj,
+    required this.postId,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +62,7 @@ class SinglePostCardWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${timeago.format(wObj['createAt'].toDate())}',
+                        '${wObj['createAt'] != null ? timeago.format(wObj['createAt'].toDate()) : ""}',
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 12,
@@ -101,7 +106,14 @@ class SinglePostCardWidget extends StatelessWidget {
               SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  // Navigate to comments page
+                  // Điều hướng tới trang bình luận và truyền thông tin về bài viết hiện tại
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CommentPage(post: wObj, postId: postId),
+                    ),
+                  );
                 },
                 child: Icon(Icons.message),
               ),
@@ -119,7 +131,7 @@ class SinglePostCardWidget extends StatelessWidget {
           SizedBox(height: 10),
           GestureDetector(
             onTap: () {
-              // Navigate to comments page
+              // Navigate to comments pagez
             },
             child: Text(
               'View all ${wObj['totalComments'] ?? 0} comments',

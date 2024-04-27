@@ -17,4 +17,5 @@ class AppColors {
   static List<Color> get secondaryG => [secondaryColor1, secondaryColor2];
   static List<Color> get secondaryF => [primaryColor2, secondaryColor2];
   static List<Color> get secondaryH => [secondaryColor1, primaryColor1];
+  static List<Color> get gray => [grayColor, midGrayColor];
 }
