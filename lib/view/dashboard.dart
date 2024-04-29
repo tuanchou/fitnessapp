@@ -2,9 +2,14 @@ import 'dart:io';
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/view/activity.dart';
 import 'package:fitness/view/home_screen.dart';
+import 'package:fitness/view/profile/profile.dart';
 import 'package:fitness/view/profile/profile_interface.dart';
-import 'package:fitness/view/social.dart';
+import 'package:fitness/view/social/home_page.dart';
+import 'package:fitness/view/social/social.dart';
+import 'package:fitness/view/social/upload_post_page.dart';
+import 'package:fitness/view/social/widget/upload_post_main_widget.dart';
 import 'package:fitness/view/workourStatistic/Statistic.dart';
+import 'package:fitness/view/workout_schedule_view/workout_schedule_view.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -22,7 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(),
     const Activity(),
-    const Statistic(),
+    const HomePage(),
     const UserProfile()
   ];
 

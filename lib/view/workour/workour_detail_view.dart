@@ -105,7 +105,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          ExercisesStepDetails(eObj: data),
+                                          ExercisesStepDetails(
+                                        eObj: data,
+                                        collectionName: widget.collectionName,
+                                      ),
                                     ),
                                   );
                                 },

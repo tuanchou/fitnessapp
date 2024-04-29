@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/view/dashboard.dart';
 import 'package:fitness/view/login.dart';
+import 'package:fitness/view/notification_screen.dart';
 import 'package:fitness/view/profile/profile.dart';
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/service/round_button.dart';
@@ -63,28 +64,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Form(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Welcome back",
-                            style: TextStyle(
-                              color: AppColors.midGrayColor,
-                              fontSize: 12,
-                            ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Welcome back",
+                          style: TextStyle(
+                            color: AppColors.grayColor,
+                            fontSize: 12,
                           ),
-                          Text(
-                            _userNameController.text,
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontSize: 20,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                            ),
+                        ),
+                        Text(
+                          _userNameController.text,
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 20,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
                           ),
-                        ],
-                      ),
+                        ),
+                        // IconButton(
+                        //     onPressed: () {
+                        //       Navigator.pushNamed(
+                        //           context, NotificationScreen.routeName);
+                        //     },
+                        //     icon: Image.asset(
+                        //       "icons/notification_icon.png",
+                        //       width: 10,
+                        //       height: 10,
+                        //       fit: BoxFit.fitHeight,
+                        //     ))
+                      ],
                     ),
                   ],
                 ),
@@ -97,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                         builder: (context) => WorkoutDetailView(
                           collectionName:
-                              'chest', // Truyền tên collection 'chest' vào WorkoutDetailView
+                              'Chest', // Truyền tên collection 'chest' vào WorkoutDetailView
                         ),
                       ),
                     );
@@ -111,11 +121,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Image.asset(
-                          "icons/bg_dots.png",
-                          height: media.width * 0.4,
-                          width: double.maxFinite,
-                          fit: BoxFit.fitHeight,
+                        Positioned.fill(
+                          left: 180,
+                          child: Image.asset(
+                            "images/nguc.png",
+                            height: media.width * 0.5,
+                            width: double.maxFinite,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -129,7 +142,78 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    "BMI1 (Body Mass Index)",
+                                    "Chest",
+                                    style: TextStyle(
+                                      color: AppColors.whiteColor,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    "You have a normal weight",
+                                    style: TextStyle(
+                                      color:
+                                          AppColors.whiteColor.withOpacity(0.7),
+                                      fontSize: 12,
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  SizedBox(height: media.width * 0.05),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: media.width * 0.05),
+                GestureDetector(
+                  onTap: () {
+                    // Add your onPressed logic here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkoutDetailView(
+                          collectionName:
+                              'Back', // Truyền tên collection 'chest' vào WorkoutDetailView
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: media.width * 0.4,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: AppColors.primaryG),
+                      borderRadius: BorderRadius.circular(media.width * 0.065),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned.fill(
+                          left: 190,
+                          child: Image.asset(
+                            "images/back.png",
+                            height: media.width * 0.5,
+                            width: double.maxFinite,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 25, horizontal: 25),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Back",
                                     style: TextStyle(
                                       color: AppColors.whiteColor,
                                       fontSize: 14,
@@ -179,11 +263,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Image.asset(
-                          "icons/bg_dots.png",
-                          height: media.width * 0.4,
-                          width: double.maxFinite,
-                          fit: BoxFit.fitHeight,
+                        Positioned.fill(
+                          left: 180,
+                          child: Image.asset(
+                            "images/vai.png",
+                            height: media.width * 0.5,
+                            width: media.width * 1,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -197,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    "BMI1 (Body Mass Index)",
+                                    "Shoulder",
                                     style: TextStyle(
                                       color: AppColors.whiteColor,
                                       fontSize: 14,
@@ -228,17 +315,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   height: media.width * 0.4,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: AppColors.secondaryF),
+                    gradient: LinearGradient(colors: AppColors.primaryG),
                     borderRadius: BorderRadius.circular(media.width * 0.065),
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Image.asset(
-                        "icons/bg_dots.png",
-                        height: media.width * 0.4,
-                        width: double.maxFinite,
-                        fit: BoxFit.fitHeight,
+                      Positioned.fill(
+                        left: 180,
+                        child: Image.asset(
+                          "images/taytruoc.png",
+                          height: media.width * 0.5,
+                          width: double.maxFinite,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       Padding(
                         padding:
@@ -252,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  "BMI (Body Mass Index)",
+                                  "Biceps",
                                   style: TextStyle(
                                     color: AppColors.whiteColor,
                                     fontSize: 14,
@@ -272,24 +362,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 SizedBox(height: media.width * 0.05),
                               ],
                             ),
-                            // AspectRatio(
-                            //   aspectRatio: 1,
-                            //   child: PieChart(
-                            //     PieChartData(
-                            //       pieTouchData: PieTouchData(
-                            //         touchCallback: (FlTouchEvent event,
-                            //             pieTouchResponse) {},
-                            //       ),
-                            //       startDegreeOffset: 250,
-                            //       borderData: FlBorderData(
-                            //         show: false,
-                            //       ),
-                            //       sectionsSpace: 1,
-                            //       centerSpaceRadius: 0,
-                            //       // sections: showingSections(),
-                            //     ),
-                            //   ),
-                            // ),
                           ],
                         ),
                       )
@@ -300,17 +372,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   height: media.width * 0.4,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: AppColors.secondaryH),
+                    gradient: LinearGradient(colors: AppColors.primaryG),
                     borderRadius: BorderRadius.circular(media.width * 0.065),
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Image.asset(
-                        "icons/bg_dots.png",
-                        height: media.width * 0.4,
-                        width: double.maxFinite,
-                        fit: BoxFit.fitHeight,
+                      Positioned.fill(
+                        left: 180,
+                        child: Image.asset(
+                          "images/taysau.png",
+                          height: media.width * 0.5,
+                          width: double.maxFinite,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       Padding(
                         padding:
@@ -324,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  "BMI (Body Mass Index)",
+                                  "Triceps",
                                   style: TextStyle(
                                     color: AppColors.whiteColor,
                                     fontSize: 14,
@@ -344,24 +419,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 SizedBox(height: media.width * 0.05),
                               ],
                             ),
-                            // AspectRatio(
-                            //   aspectRatio: 1,
-                            //   child: PieChart(
-                            //     PieChartData(
-                            //       pieTouchData: PieTouchData(
-                            //         touchCallback: (FlTouchEvent event,
-                            //             pieTouchResponse) {},
-                            //       ),
-                            //       startDegreeOffset: 250,
-                            //       borderData: FlBorderData(
-                            //         show: false,
-                            //       ),
-                            //       sectionsSpace: 1,
-                            //       centerSpaceRadius: 0,
-                            //       // sections: showingSections(),
-                            //     ),
-                            //   ),
-                            // ),
                           ],
                         ),
                       )
@@ -370,31 +427,170 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: media.width * 0.05),
                 Container(
-                  padding: EdgeInsets.all(15),
+                  height: media.width * 0.4,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor1.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(15),
+                    gradient: LinearGradient(colors: AppColors.primaryG),
+                    borderRadius: BorderRadius.circular(media.width * 0.065),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text(
-                        "Today Target",
-                        style: TextStyle(
-                          color: AppColors.blackColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      Positioned.fill(
+                        left: 180,
+                        child: Image.asset(
+                          "images/bung.png",
+                          height: media.width * 0.5,
+                          width: double.maxFinite,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      SizedBox(
-                        width: 75,
-                        height: 30,
-                        child: RoundButton(
-                          title: "check",
-                          type: RoundButtonType.primaryBG,
-                          onPressed: () {
-                            Navigator.pushNamed(context, 'profile');
-                          },
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 25, horizontal: 25),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Abs",
+                                  style: TextStyle(
+                                    color: AppColors.whiteColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  "You have a normal weight",
+                                  style: TextStyle(
+                                    color:
+                                        AppColors.whiteColor.withOpacity(0.7),
+                                    fontSize: 12,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: media.width * 0.05),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: media.width * 0.05),
+                Container(
+                  height: media.width * 0.4,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: AppColors.primaryG),
+                    borderRadius: BorderRadius.circular(media.width * 0.065),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Positioned.fill(
+                        left: 180,
+                        child: Image.asset(
+                          "images/leg.png",
+                          height: media.width * 0.5,
+                          width: double.maxFinite,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 25, horizontal: 25),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Legs",
+                                  style: TextStyle(
+                                    color: AppColors.whiteColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  "You have a normal weight",
+                                  style: TextStyle(
+                                    color:
+                                        AppColors.whiteColor.withOpacity(0.7),
+                                    fontSize: 12,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: media.width * 0.05),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: media.width * 0.05),
+                Container(
+                  height: media.width * 0.4,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: AppColors.primaryG),
+                    borderRadius: BorderRadius.circular(media.width * 0.065),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Positioned.fill(
+                        left: 180,
+                        child: Image.asset(
+                          "images/tim.png",
+                          height: media.width * 0.5,
+                          width: double.maxFinite,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 25, horizontal: 25),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Heart",
+                                  style: TextStyle(
+                                    color: AppColors.whiteColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  "You have a normal weight",
+                                  style: TextStyle(
+                                    color:
+                                        AppColors.whiteColor.withOpacity(0.7),
+                                    fontSize: 12,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: media.width * 0.05),
+                              ],
+                            ),
+                          ],
                         ),
                       )
                     ],
