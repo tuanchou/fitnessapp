@@ -22,15 +22,14 @@ class _VideoplayerwidgetState extends State<Videoplayerwidget> {
     super.initState();
 
     _controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.videoUrl), // Replace this with your video URL
+      Uri.parse(widget.videoUrl),
     );
     _controller.setLooping(true);
     _controller.initialize().then((_) {
       if (widget.autoPlay) {
         _controller.play();
-        // Phát video nếu autoPlay là true
       } else {
-        _controller.pause(); // Tạm dừng video nếu autoPlay là false
+        _controller.pause();
       }
 
       setState(() {});

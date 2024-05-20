@@ -25,22 +25,20 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   void _saveSchedule() async {
     try {
       await workout_schedule.add({
-        'user_id': user?.uid, // Đặt user_id của người dùng hiện tại ở đây
+        'user_id': user?.uid,
         'workout': selectedWorkout,
         'date': widget.date,
         'time': selectedTime,
         "markdone": false
       });
-      // Thực hiện các hành động sau khi lưu thành công
+
       print('Schedule added successfully!');
       if (widget.onScheduleAdded != null) {
         widget.onScheduleAdded!();
       }
 
-      // Đóng trang AddScheduleView và trả về kết quả là true
       Navigator.pop(context, true);
     } catch (e) {
-      // Xử lý lỗi nếu có
       print('Error adding schedule: $e');
     }
   }

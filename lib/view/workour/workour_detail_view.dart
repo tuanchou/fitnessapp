@@ -93,12 +93,18 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             );
                           }
                           int totalItems = snapshot.data!.docs.length;
-                          return ListView(
+                          List<QueryDocumentSnapshot> items =
+                              snapshot.data!.docs;
+                          return ListView.separated(
                             shrinkWrap: true,
                             physics: NeverScrollableScrollPhysics(),
-                            children: snapshot.data!.docs.map((document) {
+                            itemCount: items.length,
+                            separatorBuilder: (context, index) => SizedBox(
+                                height:
+                                    10), // Đặt khoảng cách 10 pixel giữa các mục
+                            itemBuilder: (context, index) {
                               Map<String, dynamic> data =
-                                  document.data() as Map<String, dynamic>;
+                                  items[index].data() as Map<String, dynamic>;
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -106,7 +112,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           ExercisesStepDetails(
-                                        eObj: data,
+                                        items: items,
+                                        currentIndex: index,
                                         collectionName: widget.collectionName,
                                       ),
                                     ),
@@ -114,12 +121,9 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                 },
                                 child: ListTile(
                                   title: Text(data['title']),
-                                  subtitle: Text(data['description']),
                                   leading: SizedBox(
-                                    width:
-                                        100, // Thiết lập chiều rộng mong muốn
-                                    height:
-                                        200, // Thiết lập chiều cao mong muốn
+                                    width: 100,
+                                    height: 200,
                                     child: Container(
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(30),
@@ -134,7 +138,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                   ),
                                 ),
                               );
-                            }).toList(),
+                            },
                           );
                         },
                       ),

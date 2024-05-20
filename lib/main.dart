@@ -4,6 +4,7 @@ import 'package:fitness/view/forgot_password.dart';
 import 'package:fitness/view/home_screen.dart';
 import 'package:fitness/view/login.dart';
 import 'package:fitness/view/profile/profile.dart';
+import 'package:fitness/view/profile/profile_interface.dart';
 import 'package:fitness/view/signup.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ void main() async {
       'register': (context) => const SignUp(),
       'home': (context) => const HomeScreen(),
       'profile': (context) => const Profile(),
+      'profile1': (context) => const UserProfile(),
       'forgotpassword': (context) => const ForgotPassword(),
       'dashboard': (context) => const DashboardScreen(),
     },

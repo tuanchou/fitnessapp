@@ -16,6 +16,7 @@ class HomePage extends StatelessWidget {
         backgroundColor: AppColors.whiteColor,
         centerTitle: true,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           "New Feed",
           style: TextStyle(

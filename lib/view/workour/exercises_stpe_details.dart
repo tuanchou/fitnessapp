@@ -12,11 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
-  final Map eObj;
+  final List<QueryDocumentSnapshot> items;
+  final int currentIndex;
   final String collectionName;
 
   const ExercisesStepDetails(
-      {Key? key, required this.eObj, required this.collectionName})
+      {Key? key,
+      required this.items,
+      required this.currentIndex,
+      required this.collectionName})
       : super(key: key);
 
   @override
@@ -24,19 +28,31 @@ class ExercisesStepDetails extends StatefulWidget {
 }
 
 class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
-  late int timeInSeconds = 20; // Thời gian ban đầu là 20 giây
-  late Timer? timer; // Biến đếm ngược
+  late int timeInSeconds = 20;
+  late Timer? timer;
   bool isTimerInitialized = false;
+  bool isTimerVisible = false;
+  bool isTimerRunning = false;
   User? user = FirebaseAuth.instance.currentUser;
 
   final CollectionReference _userprogress =
       FirebaseFirestore.instance.collection('userProgress');
 
+  late int currentIndex;
+  late Map<String, dynamic> currentData;
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.currentIndex;
+    currentData = widget.items[currentIndex].data() as Map<String, dynamic>;
+  }
+
   @override
   void dispose() {
     if (isTimerInitialized && timer != null) {
-      timer!.cancel(); // Hủy timer khi widget bị dispose để tránh memory leak
-    } // Hủy timer khi widget bị dispose để tránh memory leak
+      timer!.cancel();
+    }
     super.dispose();
   }
 
@@ -48,47 +64,186 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
           timeInSeconds--;
         } else {
           timer.cancel();
-          onTimerFinished(); // Hủy timer khi thời gian đếm ngược đạt 0
+          onTimerFinished();
         }
       });
     });
     isTimerInitialized = true;
+    isTimerRunning = true;
+  }
+
+  void stopTimer() {
+    if (timer != null) {
+      timer!.cancel();
+    }
+    setState(() {
+      isTimerRunning = true;
+    });
+    showStopDialog();
+  }
+
+  Future<void> showStopDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Notification'),
+          content:
+              Text('You are about to complete the exercise, so try your best'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Continue'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                startTimer();
+              },
+            ),
+            TextButton(
+              child: Text('Back to List'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+// Future<void> onTimerFinished() async {
+//   // Lấy thông tin về item hiện tại
+//   Map<String, dynamic> currentItemData = widget.items[currentIndex].data() as Map<String, dynamic>;
+
+//   // Lấy ID của item hiện tại
+//   String itemId = widget.items[currentIndex].id;
+
+//   // Kiểm tra xem ID của item đã có trong subcollection chưa
+//   bool isItemCompleted = await _checkItemCompletion(itemId);
+
+//   // Nếu item đã hoàn thành trước đó, không thêm dữ liệu vào tiến trình
+//   if (!isItemCompleted) {
+//     // Thêm ID của item vào subcollection
+//     await _userprogress.doc(user?.uid).collection(widget.collectionName).doc(itemId).set({'completed': true});
+
+//     // Lấy thông tin về tiến trình của người dùng
+//     DocumentSnapshot userDoc = await _userprogress.doc(user?.uid).get();
+
+//     // Đếm tổng số item
+//     int totalItems = widget.items.length;
+
+//     // Tính phần trăm cho mỗi item
+//     double percentageForEachItem = 100 / totalItems;
+
+//     // Kiểm tra xem tiến trình của người dùng đã tồn tại hay chưa
+//     if (userDoc.exists) {
+//       // Lấy dữ liệu về tiến trình
+//       final userData = userDoc.data() as Map<String, dynamic>;
+
+//       // Tính toán phần trăm mới
+//       double currentPercentage = userData.containsKey(widget.collectionName) ? userData[widget.collectionName] : 0.0;
+//       double newPercentage = currentPercentage + percentageForEachItem;
+
+//       // Cập nhật tiến trình của người dùng
+//       await _userprogress.doc(user?.uid).set({
+//         widget.collectionName: newPercentage,
+//       }, SetOptions(merge: true));
+//     } else {
+//       // Nếu tiến trình chưa tồn tại, tạo mới và đặt phần trăm cho item đầu tiên
+//       double newPercentage = percentageForEachItem;
+//       await _userprogress.doc(user?.uid).set({
+//         widget.collectionName: newPercentage,
+//       });
+//     }
+//   }
+// }
+
+// Hàm kiểm tra xem ID của item đã có trong subcollection chưa
+  Future<bool> _checkItemCompletion(String itemId) async {
+    DocumentSnapshot itemDoc = await _userprogress
+        .doc(user?.uid)
+        .collection(widget.collectionName)
+        .doc(itemId)
+        .get();
+    return itemDoc.exists;
   }
 
   Future<void> onTimerFinished() async {
     QuerySnapshot collectionSnapshot = await FirebaseFirestore.instance
         .collection(widget.collectionName)
         .get();
+    Map<String, dynamic> currentItemData =
+        widget.items[currentIndex].data() as Map<String, dynamic>;
+    String itemId = widget.items[currentIndex].id;
     int totalItems = collectionSnapshot.docs.length;
     double percentageForEachItem = 100 / totalItems;
-
+    bool isItemCompleted = await _checkItemCompletion(itemId);
     DocumentSnapshot userDoc = await _userprogress.doc(user?.uid).get();
     if (userDoc.exists) {
-      final userData = userDoc.data() as Map<String, dynamic>;
-      double currentPercentage = 0.0; // Khởi tạo currentPercentage
-      double newPercentage = 0.0; // Khởi tạo newPercentage
-      if (userData != null && userData.containsKey(widget.collectionName)) {
-        currentPercentage = userData[widget
-            .collectionName]; // Lấy giá trị hiện tại của widget.collectionName
-        newPercentage =
-            currentPercentage + percentageForEachItem; // Tính toán giá trị mới
-        await _userprogress.doc(user?.uid).update({
-          widget.collectionName: newPercentage,
-        });
-      } else {
-        newPercentage =
-            percentageForEachItem; // Nếu trường chưa tồn tại, giá trị mới sẽ là percentageForEachItem
-        await _userprogress.doc(user?.uid).set({
-          widget.collectionName: newPercentage,
-        }, SetOptions(merge: true));
+      if (!isItemCompleted) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        double currentPercentage = 0.0;
+        double newPercentage = 0.0;
+        if (userData != null && userData.containsKey(widget.collectionName)) {
+          currentPercentage = userData[widget.collectionName];
+          newPercentage = currentPercentage + percentageForEachItem;
+          await _userprogress.doc(user?.uid).update({
+            widget.collectionName: newPercentage,
+          });
+          await _userprogress
+              .doc(user?.uid)
+              .collection(widget.collectionName)
+              .doc(itemId)
+              .set({
+            "complete": true,
+          });
+        } else {
+          newPercentage = percentageForEachItem;
+          await _userprogress.doc(user?.uid).set({
+            widget.collectionName: newPercentage,
+          }, SetOptions(merge: true));
+          await _userprogress
+              .doc(user?.uid)
+              .collection(widget.collectionName)
+              .doc(itemId)
+              .set({
+            "complete": true,
+          });
+        }
       }
     } else {
       double newPercentage = percentageForEachItem;
       await _userprogress.doc(user?.uid).set({
-        widget.collectionName:
-            newPercentage, // Thiết lập giá trị cho trường có tên là widget.collectionName
+        widget.collectionName: newPercentage,
+      });
+      await _userprogress
+          .doc(user?.uid)
+          .collection(widget.collectionName)
+          .doc(itemId)
+          .set({
+        "complete": true,
       });
     }
+  }
+
+  void showNextItem() {
+    setState(() {
+      if (currentIndex < widget.items.length - 1) {
+        currentIndex++;
+        currentData = widget.items[currentIndex].data() as Map<String, dynamic>;
+        timeInSeconds = 20;
+      }
+    });
+  }
+
+  void showPreviousItem() {
+    setState(() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        currentData = widget.items[currentIndex].data() as Map<String, dynamic>;
+        timeInSeconds = 20;
+      }
+    });
   }
 
   @override
@@ -128,7 +283,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.eObj["title"].toString(),
+                currentData["title"].toString(),
                 style: TextStyle(
                     color: AppColors.blackColor,
                     fontSize: 16,
@@ -153,11 +308,11 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: widget.eObj["_videoUrl"] != null
+                child: currentData["_videoUrl"] != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Videoplayerwidget(
-                          videoUrl: widget.eObj["_videoUrl"],
+                          videoUrl: currentData["_videoUrl"],
                           autoPlay: false,
                         ),
                       )
@@ -177,7 +332,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 height: 4,
               ),
               ReadMoreText(
-                widget.eObj["description"],
+                currentData["description"],
                 trimLines: 4,
                 colorClickableText: AppColors.blackColor,
                 trimMode: TrimMode.Line,
@@ -201,30 +356,111 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                     fontWeight: FontWeight.w700),
               ),
               const SizedBox(
-                height: 200,
+                height: 4,
+              ),
+              ReadMoreText(
+                currentData["note"],
+                trimLines: 4,
+                colorClickableText: AppColors.blackColor,
+                trimMode: TrimMode.Line,
+                trimCollapsedText: ' Read More ...',
+                trimExpandedText: ' Read Less',
+                style: TextStyle(
+                  color: AppColors.grayColor,
+                  fontSize: 12,
+                ),
+                moreStyle:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(
+                height: 150,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  currentIndex > 0
+                      ? GestureDetector(
+                          onTap: showPreviousItem,
+                          child: Image.asset(
+                            "icons/ArrowLeft.png",
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                      : SizedBox(width: 24),
+                  SizedBox(width: 20),
                   Text(
-                    "00:${timeInSeconds.toString().padLeft(2, '0')}",
+                    "${currentIndex + 1}/${widget.items.length}",
                     style: TextStyle(
-                      color: AppColors.grayColor,
+                      color: AppColors.blackColor,
                       fontSize: 24,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  SizedBox(width: 20),
+                  currentIndex < widget.items.length - 1
+                      ? GestureDetector(
+                          onTap: showNextItem,
+                          child: Image.asset(
+                            "icons/ArrowRight.png",
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                      : SizedBox(width: 24)
                 ],
               ),
+              const SizedBox(
+                height: 50,
+              ),
+              if (isTimerVisible)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (timeInSeconds == 0)
+                      Text(
+                        "Hoàn thành bài tập",
+                        style: TextStyle(
+                          color: AppColors.grayColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    else
+                      Text(
+                        "00:${timeInSeconds.toString().padLeft(2, '0')}",
+                        style: TextStyle(
+                          color: AppColors.grayColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
               Center(
                 child: RoundGradientButton(
-                  title: "Start",
+                  title: timeInSeconds == 0
+                      ? "Next"
+                      : (isTimerRunning ? "Stop" : "Start"),
                   onPressed: () {
                     setState(() {
-                      timeInSeconds =
-                          5; // Reset thời gian về 20 giây khi nút được nhấn
+                      if (timeInSeconds == 0) {
+                        showNextItem();
+                        isTimerVisible = false;
+                        isTimerRunning = false;
+                      } else {
+                        if (isTimerRunning) {
+                          stopTimer();
+                          isTimerVisible = true;
+                        } else {
+                          timeInSeconds = 5;
+                          startTimer();
+                          isTimerVisible = true;
+                        }
+                      }
                     });
-                    startTimer();
                   },
                 ),
               ),
