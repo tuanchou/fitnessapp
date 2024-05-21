@@ -24,20 +24,52 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   DateTime selectedTime = DateTime.now();
   void _saveSchedule() async {
     try {
-      await workout_schedule.add({
-        'user_id': user?.uid,
-        'workout': selectedWorkout,
-        'date': widget.date,
-        'time': selectedTime,
-        "markdone": false
-      });
+      DateTime now = DateTime.now();
+      if (selectedTime.isAfter(now) && selectedWorkout != 'Choose Workout') {
+        await workout_schedule.add({
+          'user_id': user?.uid,
+          'workout': selectedWorkout,
+          'date': widget.date,
+          'time': selectedTime,
+          "markdone": false
+        });
 
-      print('Schedule added successfully!');
-      if (widget.onScheduleAdded != null) {
-        widget.onScheduleAdded!();
+        print('Schedule added successfully!');
+        if (widget.onScheduleAdded != null) {
+          widget.onScheduleAdded!();
+        }
+
+        Navigator.pop(context, true);
+      } else {
+        // Prepare the error message
+        String errorMessage = '';
+        if (selectedTime.isBefore(now)) {
+          errorMessage = 'Selected time is before the current time.';
+        }
+        if (selectedWorkout == 'Choose Workout') {
+          if (errorMessage.isNotEmpty) errorMessage += '\n';
+          errorMessage += 'Please choose a workout.';
+        }
+
+        // Show dialog for invalid time or workout
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Invalid Input'),
+              content: Text(errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       }
-
-      Navigator.pop(context, true);
     } catch (e) {
       print('Error adding schedule: $e');
     }
@@ -157,7 +189,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           const SizedBox(
             height: 8,
           ),
-
           Container(
             decoration: BoxDecoration(
                 color: AppColors.lightGrayColor,
@@ -218,33 +249,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               ],
             ),
           ),
-          // const SizedBox(
-          //   height: 10,
-          // ),
-          // IconTitleNextRow(
-          //     icon: "icons/difficulity_icon.png",
-          //     title: "Difficulity",
-          //     time: "Beginner",
-          //     color: AppColors.lightGrayColor,
-          //     onPressed: () {}),
-          // const SizedBox(
-          //   height: 10,
-          // ),
-          // IconTitleNextRow(
-          //     icon: "icons/repetitions.png",
-          //     title: "Custom Repetitions",
-          //     time: "",
-          //     color: AppColors.lightGrayColor,
-          //     onPressed: () {}),
-          // const SizedBox(
-          //   height: 10,
-          // ),
-          // IconTitleNextRow(
-          //     icon: "icons/repetitions.png",
-          //     title: "Custom Weights",
-          //     time: "",
-          //     color: AppColors.lightGrayColor,
-          //     onPressed: () {}),
           Spacer(),
           RoundGradientButton(
             title: "Save",

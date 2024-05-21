@@ -57,6 +57,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
             : '';
 
         return {
+          'id': doc.id,
           'name': workoutName,
           'start_time': formattedDate + ' ' + formattedTime,
           'markdone': markdone,
@@ -171,9 +172,18 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                       : '';
                                   var markdone = sObj["markdone"] ??
                                       false; // Lấy giá trị markdone
-                                  var gradientColors = markdone
-                                      ? AppColors.primaryG
-                                      : AppColors.secondaryG;
+                                  var gradientColors;
+                                  if (markdone) {
+                                    gradientColors = AppColors.primaryG;
+                                  } else {
+                                    if (eventTime.isAfter(DateTime.now())) {
+                                      gradientColors = AppColors.secondaryG;
+                                    } else {
+                                      if (eventTime.isBefore(DateTime.now())) {
+                                        gradientColors = AppColors.gray;
+                                      }
+                                    }
+                                  }
 
                                   return Container(
                                     padding: const EdgeInsets.symmetric(
@@ -185,10 +195,30 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                     ),
                                     child: InkWell(
                                       onTap: () {
-                                        var eventName = sObj["name"].toString();
-                                        var eventFormattedTime = eventTime;
-                                        showEventDetailsDialog(
-                                            eventName, eventFormattedTime);
+                                        // Chỉ hiển thị hộp thoại nếu màu sắc là AppColors.secondaryG
+                                        var markdone =
+                                            sObj["markdone"] ?? false;
+                                        var eventTime = stringToDate(
+                                          sObj["start_time"].toString(),
+                                          formatStr: "dd/MM/yyyy hh:mm aa",
+                                        );
+
+                                        // Kiểm tra nếu sự kiện đã được đánh dấu là hoàn thành (markdone = true)
+                                        // hoặc nếu thời gian sự kiện đã qua thì không hiển thị dialog
+                                        if (!markdone &&
+                                            eventTime.isAfter(DateTime.now())) {
+                                          var eventId = sObj["id"].toString();
+                                          var eventName =
+                                              sObj["name"].toString();
+                                          var eventFormattedTime = eventTime;
+
+                                          // Hiển thị dialog
+                                          showEventDetailsDialog(
+                                            eventId,
+                                            eventName,
+                                            eventFormattedTime,
+                                          );
+                                        }
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
@@ -258,7 +288,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
     );
   }
 
-  void showEventDetailsDialog(String eventName, DateTime formattedTime) {
+  void showEventDetailsDialog(
+      String eventId, String eventName, DateTime formattedTime) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -373,18 +404,9 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                 RoundGradientButton(
                   title: "Mark Done",
                   onPressed: () {
-                    // Tìm document tương ứng với sự kiện đang xử lý
-                    var eventDoc = eventArr.firstWhere((event) =>
-                        event['name'] == eventName &&
-                        event['start_time'] ==
-                            formatDateTimeToString(formattedTime));
-
-                    // Lấy document ID
-                    String docId = eventDoc['id'];
-
                     // Cập nhật trường markdone trong Firestore
                     workout_schedule
-                        .doc(docId)
+                        .doc(eventId)
                         .update({'markdone': true}).then((_) {
                       print('markdone updated successfully');
                       // Cập nhật giao diện hoặc thực hiện các hành động khác
