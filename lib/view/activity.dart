@@ -24,6 +24,7 @@ class _ActivityState extends State<Activity> {
         backgroundColor: AppColors.whiteColor,
         centerTitle: true,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           "My Activity",
           style: TextStyle(

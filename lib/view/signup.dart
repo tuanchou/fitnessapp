@@ -97,6 +97,13 @@ class _MyRegisterState extends State<SignUp> {
                   true,
                   _passwordTextController,
                 ),
+                Text(
+                  _passwordError,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 14,
+                  ),
+                ),
                 SizedBox(
                   height: 15,
                 ),

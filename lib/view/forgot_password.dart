@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/view/signup.dart';
 import 'package:flutter/material.dart';
 
@@ -37,30 +38,29 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.whiteColor,
+      appBar: AppBar(
+        backgroundColor: AppColors.whiteColor,
+        centerTitle: true,
+        elevation: 0,
+        title: const Text(
+          "Password Recovery",
+          style: TextStyle(
+              color: AppColors.blackColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700),
+        ),
+      ),
       body: Container(
         child: Column(
           children: [
             SizedBox(
               height: 70.0,
             ),
-            Container(
-              alignment: Alignment.topCenter,
-              child: Text(
-                "Password Recovery",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
             Text(
               "Enter your mail",
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.blackColor,
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold),
             ),
@@ -74,8 +74,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           Container(
                             padding: EdgeInsets.only(left: 10.0),
                             decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.white70, width: 2.0),
+                              border: Border.all(
+                                  color: AppColors.blackColor, width: 2.0),
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: TextFormField(
@@ -86,14 +86,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 return null;
                               },
                               controller: mailcontroller,
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: AppColors.blackColor),
                               decoration: InputDecoration(
                                   hintText: "Email",
                                   hintStyle: TextStyle(
-                                      fontSize: 18.0, color: Colors.white),
+                                      fontSize: 18.0,
+                                      color: AppColors.blackColor),
                                   prefixIcon: Icon(
                                     Icons.person,
-                                    color: Colors.white70,
+                                    color: AppColors.blackColor,
                                     size: 30.0,
                                   ),
                                   border: InputBorder.none),
@@ -115,13 +116,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               width: 140,
                               padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: AppColors.blackColor,
                                   borderRadius: BorderRadius.circular(10)),
                               child: Center(
                                 child: Text(
                                   "Send Email",
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: AppColors.whiteColor,
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -137,7 +138,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               Text(
                                 "Don't have an account?",
                                 style: TextStyle(
-                                    fontSize: 18.0, color: Colors.white),
+                                    fontSize: 18.0,
+                                    color: AppColors.blackColor),
                               ),
                               SizedBox(
                                 width: 5.0,

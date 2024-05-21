@@ -35,7 +35,7 @@ class DataList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('Shoulder').snapshots(),
+      stream: FirebaseFirestore.instance.collection('Chest').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -66,12 +66,13 @@ class AddDataDialog extends StatefulWidget {
 class _AddDataDialogState extends State<AddDataDialog> {
   File? _videoFile;
   final CollectionReference _dataAdd =
-      FirebaseFirestore.instance.collection('Shoulder');
+      FirebaseFirestore.instance.collection('Chest');
   final _storage = FirebaseStorage.instance;
   String _videoUrl = 'null';
   final picker = ImagePicker();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
+  TextEditingController _noteController = TextEditingController();
 
   Future pickVideo() async {
     final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
@@ -84,6 +85,7 @@ class _AddDataDialogState extends State<AddDataDialog> {
   Future<void> _submitData() async {
     if (_titleController.text.isEmpty ||
         _descriptionController.text.isEmpty ||
+        _noteController.text.isEmpty ||
         _videoFile == null) {
       // Kiểm tra nếu có bất kỳ trường nào trống thì không thêm dữ liệu
       return;
@@ -98,6 +100,7 @@ class _AddDataDialogState extends State<AddDataDialog> {
       await _dataAdd.add({
         'title': _titleController.text,
         'description': _descriptionController.text,
+        'note': _noteController.text,
         '_videoUrl': _videoUrl
       });
 
@@ -105,6 +108,7 @@ class _AddDataDialogState extends State<AddDataDialog> {
       setState(() {
         _titleController.clear();
         _descriptionController.clear();
+        _noteController.clear();
         _videoFile = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -139,6 +143,13 @@ class _AddDataDialogState extends State<AddDataDialog> {
               controller: _descriptionController,
               decoration: InputDecoration(
                 labelText: 'Description',
+              ),
+            ),
+            SizedBox(height: 20.0),
+            TextField(
+              controller: _noteController,
+              decoration: InputDecoration(
+                labelText: 'Note',
               ),
             ),
             SizedBox(height: 20.0),

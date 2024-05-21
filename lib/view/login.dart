@@ -16,6 +16,16 @@ class LogIn extends StatefulWidget {
 class _MyLoginState extends State<LogIn> {
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _passwordTextController = TextEditingController();
+  String _passwordError = '';
+  String _emailError = '';
+
+  bool isEmailValid(String email) {
+    final RegExp emailRegex = RegExp(
+      r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -65,12 +75,26 @@ class _MyLoginState extends State<LogIn> {
                   SizedBox(height: media.width * 0.05),
                   reusableTextField('Enter Email', Icons.email_outlined, false,
                       _emailTextController),
+                  Text(
+                    _emailError,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                    ),
+                  ),
                   SizedBox(height: media.width * 0.05),
                   reusableTextField(
                     'Enter Password',
                     Icons.lock_outline,
                     true,
                     _passwordTextController,
+                  ),
+                  Text(
+                    _passwordError,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                    ),
                   ),
                   SizedBox(height: media.width * 0.03),
                   GestureDetector(
@@ -83,13 +107,63 @@ class _MyLoginState extends State<LogIn> {
                     ),
                   ),
                   registerOption(),
-                  loginRegisterButton(context, true, () {
-                    FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                            email: _emailTextController.text,
-                            password: _passwordTextController.text)
-                        .then((value) =>
-                            {Navigator.pushNamed(context, 'dashboard')});
+                  loginRegisterButton(context, true, () async {
+                    setState(() {
+                      _emailError = '';
+                      _passwordError = '';
+                    });
+
+                    if (_emailTextController.text.isEmpty) {
+                      setState(() {
+                        _emailError = "Email is required.";
+                      });
+                      return;
+                    }
+
+                    if (!isEmailValid(_emailTextController.text)) {
+                      setState(() {
+                        _emailError = "Email address is not valid.";
+                      });
+                      return;
+                    }
+
+                    if (_passwordTextController.text.isEmpty) {
+                      setState(() {
+                        _passwordError = "Password is required.";
+                      });
+                      return;
+                    }
+
+                    try {
+                      final userCredential = await FirebaseAuth.instance
+                          .signInWithEmailAndPassword(
+                        email: _emailTextController.text,
+                        password: _passwordTextController.text,
+                      );
+
+                      Navigator.pushNamed(context, 'dashboard');
+                    } catch (e) {
+                      if (e is FirebaseAuthException) {
+                        if (e.code == 'user-not-found') {
+                          setState(() {
+                            _emailError = "No user found for that email.";
+                          });
+                        } else if (e.code == 'wrong-password') {
+                          setState(() {
+                            _passwordError = "Wrong password provided.";
+                          });
+                        } else {
+                          setState(() {
+                            _passwordError = "Login failed. Please try again.";
+                          });
+                        }
+                      } else {
+                        setState(() {
+                          _passwordError =
+                              "An error occurred. Please try again.";
+                        });
+                      }
+                    }
                   }),
                   SizedBox(height: media.width * 0.01),
                   Row(

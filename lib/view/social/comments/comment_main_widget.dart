@@ -182,47 +182,71 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                         }
                         // Hiển thị ListTile với thông tin của bình luận và người dùng
                         return ListTile(
-                          title: Row(
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${userData?['Name']} ${authorLabel.isNotEmpty ? '($authorLabel)' : ''}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: authorLabel.isNotEmpty
-                                            ? Colors.blue
-                                            : Colors
-                                                .black, // Màu chữ tùy thuộc vào trạng thái của authorLabel
-                                      ),
-                                    ), // Display user's name
-                                    SizedBox(width: 5),
-                                    Text(
-                                      commentData?['createAt'] != null
-                                          ? timeago.format(
-                                              commentData?['createAt']!
-                                                  .toDate())
-                                          : "",
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 10,
-                                      ),
-                                    ), // Display comment's creation time
-                                  ],
-                                ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${userData?['Name']} ${authorLabel.isNotEmpty ? '($authorLabel)' : ''}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: authorLabel.isNotEmpty
+                                                ? Colors.blue
+                                                : Colors.black,
+                                          ),
+                                        ),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          commentData?['description'] ?? '',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      // Xử lý khi người dùng nhấn vào biểu tượng "like"
+                                      // Thực hiện các hành động liên quan đến like bình luận
+                                    },
+                                    child: Icon(Icons.thumb_up),
+                                  ),
+                                  SizedBox(width: 10),
+                                  GestureDetector(
+                                    onTap: () {
+                                      // Xử lý khi người dùng nhấn vào biểu tượng "reply"
+                                      // Thực hiện các hành động liên quan đến reply bình luận
+                                    },
+                                    child: Icon(Icons.reply),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                           leading: CircleAvatar(
                             backgroundImage:
                                 NetworkImage(userData?['Avatar'] ?? ''),
-                          ), // Display user's avatar
+                          ),
                           subtitle: Text(
-                            commentData?['description'] ?? '',
-                            style: TextStyle(fontSize: 16),
-                          ), // Display comment's description
+                            commentData?['createAt'] != null
+                                ? timeago
+                                    .format(commentData?['createAt']!.toDate())
+                                : "",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 10,
+                            ),
+                          ),
                         );
                       },
                     );

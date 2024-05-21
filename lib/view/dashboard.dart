@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:fitness/service/app_colors.dart';
 import 'package:fitness/view/activity.dart';
+import 'package:fitness/view/addData.dart';
 import 'package:fitness/view/home_screen.dart';
 import 'package:fitness/view/profile/profile.dart';
 import 'package:fitness/view/profile/profile_interface.dart';

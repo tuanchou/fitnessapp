@@ -39,6 +39,17 @@ String dateToString(DateTime date, {String formatStr = "dd/MM/yyyy hh:mm a"}) {
   return format.format(date);
 }
 
+String formatDateTimeToString1(DateTime datetime) {
+  String day = datetime.day.toString().padLeft(2, '0');
+  String month = datetime.month.toString().padLeft(2, '0');
+  String year = datetime.year.toString();
+  String hour = datetime.hour.toString().padLeft(2, '0');
+  String minute = datetime.minute.toString().padLeft(2, '0');
+  String period = datetime.hour >= 12 ? 'PM' : 'AM';
+
+  return '$day/$month/$year $hour:$minute $period';
+}
+
 String formatDateTimeToString(DateTime datetime) {
   return '${datetime.day}/${datetime.month}/${datetime.year} ${datetime.hour}:${datetime.minute}';
 }

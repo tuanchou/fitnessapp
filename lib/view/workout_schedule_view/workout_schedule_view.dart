@@ -44,31 +44,26 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       var querySnapshot =
           await workout_schedule.where('user_id', isEqualTo: user?.uid).get();
 
-      // Xử lý dữ liệu từ querySnapshot và cập nhật danh sách eventArr
       eventArr = querySnapshot.docs.map((doc) {
         var data = doc.data() as Map<String, dynamic>;
-
-        // Trích xuất các trường từ dữ liệu Firestore và chuyển đổi định dạng
-        var workoutName = data['workout'] ?? ''; // Tên workout
-        var date = data['date'] as Timestamp?; // Timestamp của ngày
-        var time = data['time'] as Timestamp?; // Timestamp của thời gian
+        var workoutName = data['workout'] ?? '';
+        var date = data['date'] as Timestamp?;
+        var time = data['time'] as Timestamp?;
         var markdone = data['markdone'] ?? false;
-        // Định dạng ngày và giờ thành định dạng mong muốn (dd/MM/yyyy hh:mm a)
 
         var formattedDate = formatTimestampToDate(date);
         var formattedTime = time != null
             ? formatTime12Hour(time.toDate().toString().substring(11, 16))
             : '';
 
-        // Tạo map mới với các trường đã định dạng
         return {
+          'id': doc.id,
           'name': workoutName,
           'start_time': formattedDate + ' ' + formattedTime,
           'markdone': markdone,
         };
       }).toList();
 
-      // Cập nhật danh sách các sự kiện cho ngày được chọn
       setDayEventWorkoutList();
     } catch (e) {
       print('Error loading workout schedule data: $e');
@@ -78,16 +73,15 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
   void setDayEventWorkoutList() {
     var date = dateToStartDate(_selectedDateAppBBar);
     selectDayEventArr = eventArr.where((wObj) {
-      var start_time = wObj["start_time"] as String?; // Lấy giá trị start_time
+      var start_time = wObj["start_time"] as String?;
       if (start_time != null) {
         var eventDate =
             stringToDate(start_time, formatStr: "dd/MM/yyyy hh:mm aa");
         return dateToStartDate(eventDate) == date;
       }
-      return false; // Trả về false nếu start_time là null
+      return false;
     }).toList();
 
-    // Sắp xếp danh sách theo thời gian
     selectDayEventArr.sort((a, b) {
       var aTime = stringToDate(a["start_time"].toString(),
           formatStr: "dd/MM/yyyy hh:mm aa");
@@ -121,7 +115,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
             selectedDateColor: Colors.blue,
             dateColor: Colors.black,
             locale: 'en',
-            initialDate: _selectedDateAppBBar, // Sử dụng ngày được chọn
+            initialDate: _selectedDateAppBBar,
             calendarEventColor: AppColors.primaryColor2,
             firstDate: DateTime.now().subtract(const Duration(days: 140)),
             lastDate: DateTime.now().add(const Duration(days: 60)),
@@ -178,9 +172,18 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                       : '';
                                   var markdone = sObj["markdone"] ??
                                       false; // Lấy giá trị markdone
-                                  var gradientColors = markdone
-                                      ? AppColors.primaryG
-                                      : AppColors.secondaryG;
+                                  var gradientColors;
+                                  if (markdone) {
+                                    gradientColors = AppColors.primaryG;
+                                  } else {
+                                    if (eventTime.isAfter(DateTime.now())) {
+                                      gradientColors = AppColors.secondaryG;
+                                    } else {
+                                      if (eventTime.isBefore(DateTime.now())) {
+                                        gradientColors = AppColors.gray;
+                                      }
+                                    }
+                                  }
 
                                   return Container(
                                     padding: const EdgeInsets.symmetric(
@@ -192,10 +195,30 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                     ),
                                     child: InkWell(
                                       onTap: () {
-                                        var eventName = sObj["name"].toString();
-                                        var eventFormattedTime = eventTime;
-                                        showEventDetailsDialog(
-                                            eventName, eventFormattedTime);
+                                        // Chỉ hiển thị hộp thoại nếu màu sắc là AppColors.secondaryG
+                                        var markdone =
+                                            sObj["markdone"] ?? false;
+                                        var eventTime = stringToDate(
+                                          sObj["start_time"].toString(),
+                                          formatStr: "dd/MM/yyyy hh:mm aa",
+                                        );
+
+                                        // Kiểm tra nếu sự kiện đã được đánh dấu là hoàn thành (markdone = true)
+                                        // hoặc nếu thời gian sự kiện đã qua thì không hiển thị dialog
+                                        if (!markdone &&
+                                            eventTime.isAfter(DateTime.now())) {
+                                          var eventId = sObj["id"].toString();
+                                          var eventName =
+                                              sObj["name"].toString();
+                                          var eventFormattedTime = eventTime;
+
+                                          // Hiển thị dialog
+                                          showEventDetailsDialog(
+                                            eventId,
+                                            eventName,
+                                            eventFormattedTime,
+                                          );
+                                        }
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
@@ -265,7 +288,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
     );
   }
 
-  void showEventDetailsDialog(String eventName, DateTime formattedTime) {
+  void showEventDetailsDialog(
+      String eventId, String eventName, DateTime formattedTime) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -380,18 +404,9 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                 RoundGradientButton(
                   title: "Mark Done",
                   onPressed: () {
-                    // Tìm document tương ứng với sự kiện đang xử lý
-                    var eventDoc = eventArr.firstWhere((event) =>
-                        event['name'] == eventName &&
-                        event['start_time'] ==
-                            formatDateTimeToString(formattedTime));
-
-                    // Lấy document ID
-                    String docId = eventDoc['id'];
-
                     // Cập nhật trường markdone trong Firestore
                     workout_schedule
-                        .doc(docId)
+                        .doc(eventId)
                         .update({'markdone': true}).then((_) {
                       print('markdone updated successfully');
                       // Cập nhật giao diện hoặc thực hiện các hành động khác
