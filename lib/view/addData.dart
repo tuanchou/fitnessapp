@@ -35,7 +35,7 @@ class DataList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('Chest').snapshots(),
+      stream: FirebaseFirestore.instance.collection('Shoulder').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -47,7 +47,10 @@ class DataList extends StatelessWidget {
             return ListTile(
               title: Text(document['title']),
               subtitle: Text(document['description']),
-              leading: Videoplayerwidget(videoUrl: document['_videoUrl']),
+              leading: Videoplayerwidget(
+                videoUrl: document['_videoUrl'],
+                autoPlay: false,
+              ),
             );
           }).toList(),
         );
@@ -66,7 +69,7 @@ class AddDataDialog extends StatefulWidget {
 class _AddDataDialogState extends State<AddDataDialog> {
   File? _videoFile;
   final CollectionReference _dataAdd =
-      FirebaseFirestore.instance.collection('Chest');
+      FirebaseFirestore.instance.collection('Shoulder');
   final _storage = FirebaseStorage.instance;
   String _videoUrl = 'null';
   final picker = ImagePicker();
@@ -93,7 +96,7 @@ class _AddDataDialogState extends State<AddDataDialog> {
 
     try {
       Reference storageReference =
-          _storage.ref().child('shoulderVideo/${DateTime.now()}.mp4');
+          _storage.ref().child('shoulder1Video/${DateTime.now()}.mp4');
       await storageReference.putFile(File(_videoFile!.path));
       String _videoUrl = await storageReference.getDownloadURL();
       // Lưu dữ liệu vào Firestore

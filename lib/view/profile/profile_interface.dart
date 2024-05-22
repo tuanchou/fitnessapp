@@ -20,6 +20,9 @@ class _UserProfileState extends State<UserProfile> {
   final CollectionReference _user =
       FirebaseFirestore.instance.collection('user-info');
   final _userNameController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _weightController = TextEditingController();
+  DateTime? _dob;
   String _imageURL = "";
   bool positive = false;
 
@@ -40,11 +43,26 @@ class _UserProfileState extends State<UserProfile> {
         setState(() {
           _userNameController.text = userData['Name'];
           _imageURL = userData['Avatar'] ?? '';
+          _heightController.text = userData['Height'] ?? '';
+          _weightController.text = userData['Weight'] ?? '';
+          if (userData['DoB'] != null) {
+            _dob = DateTime.parse(userData['DoB']);
+          }
         });
       } catch (e) {
         print('Error fetching user data: $e');
       }
     }
+  }
+
+  int calculateAge(DateTime dob) {
+    DateTime now = DateTime.now();
+    int age = now.year - dob.year;
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      age--;
+    }
+    return age;
   }
 
   List accountArr = [
@@ -142,11 +160,11 @@ class _UserProfileState extends State<UserProfile> {
               const SizedBox(
                 height: 15,
               ),
-              const Row(
+              Row(
                 children: [
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "180cm",
+                      title: "${_heightController.text}cm",
                       subtitle: "Height",
                     ),
                   ),
@@ -155,7 +173,7 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "65kg",
+                      title: "${_weightController.text}kg",
                       subtitle: "Weight",
                     ),
                   ),
@@ -164,7 +182,7 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "22yo",
+                      title: "${_dob != null ? calculateAge(_dob!) : 'N/A'}yo",
                       subtitle: "Age",
                     ),
                   ),

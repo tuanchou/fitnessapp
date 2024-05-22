@@ -1,18 +1,84 @@
 import 'package:fitness/view/social/comments/comment_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:firebase_auth/firebase_auth.dart';
 
-class SinglePostCardWidget extends StatelessWidget {
+class SinglePostCardWidget extends StatefulWidget {
   final Map<String, dynamic> wObj;
   final String postId;
+
   const SinglePostCardWidget({
     Key? key,
     required this.wObj,
     required this.postId,
   }) : super(key: key);
+
+  @override
+  _SinglePostCardWidgetState createState() => _SinglePostCardWidgetState();
+}
+
+class _SinglePostCardWidgetState extends State<SinglePostCardWidget> {
+  bool _isLiked = false;
+  int _totalLikes = 0;
+  @override
+  void initState() {
+    super.initState();
+    _totalLikes = widget.wObj['totalLikes'] ?? 0;
+    _checkIfLiked();
+  }
+
+  Future<void> _checkIfLiked() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .doc(widget.postId)
+          .get();
+      if (snapshot.exists) {
+        List likes = snapshot['likes'] ?? [];
+        setState(() {
+          _isLiked = likes.contains(user.uid);
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleLike() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentReference postRef =
+          FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(postRef);
+        if (!snapshot.exists) {
+          throw Exception("Post does not exist!");
+        }
+
+        List likes = snapshot['likes'] ?? [];
+        int totalLikes = snapshot['totalLikes'] ?? 0;
+
+        if (_isLiked) {
+          likes.remove(user.uid);
+          totalLikes--;
+        } else {
+          likes.add(user.uid);
+          totalLikes++;
+        }
+
+        transaction.update(postRef, {
+          'likes': likes,
+          'totalLikes': totalLikes,
+        });
+
+        setState(() {
+          _isLiked = !_isLiked;
+          _totalLikes = totalLikes;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +90,7 @@ class SinglePostCardWidget extends StatelessWidget {
           FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance
                 .collection('user-info')
-                .doc(wObj['creatorUid'])
+                .doc(widget.wObj['creatorUid'])
                 .get(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -62,7 +128,7 @@ class SinglePostCardWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${wObj['createAt'] != null ? timeago.format(wObj['createAt'].toDate()) : ""}',
+                        '${widget.wObj['createAt'] != null ? timeago.format(widget.wObj['createAt'].toDate()) : ""}',
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 12,
@@ -76,9 +142,7 @@ class SinglePostCardWidget extends StatelessWidget {
           ),
           SizedBox(height: 10),
           GestureDetector(
-            onDoubleTap: () {
-              // Like functionality can be implemented here
-            },
+            onDoubleTap: _toggleLike,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -87,7 +151,7 @@ class SinglePostCardWidget extends StatelessWidget {
                   height: MediaQuery.of(context).size.height * 0.30,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(wObj['postImageUrl'] ?? ''),
+                      image: NetworkImage(widget.wObj['postImageUrl'] ?? ''),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -99,19 +163,21 @@ class SinglePostCardWidget extends StatelessWidget {
           SizedBox(height: 10),
           Row(
             children: [
-              // Like button can be implemented here
-              Icon(
-                Icons.favorite,
+              GestureDetector(
+                onTap: _toggleLike,
+                child: Icon(
+                  _isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: _isLiked ? Colors.red : Colors.black,
+                ),
               ),
               SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  // Điều hướng tới trang bình luận và truyền thông tin về bài viết hiện tại
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          CommentPage(post: wObj, postId: postId),
+                          CommentPage(post: widget.wObj, postId: widget.postId),
                     ),
                   );
                 },
@@ -121,20 +187,26 @@ class SinglePostCardWidget extends StatelessWidget {
           ),
           SizedBox(height: 10),
           Text(
-            '${wObj['totalLikes'] ?? 0} likes',
+            '${widget.wObj['totalLikes'] ?? 0} likes',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 10),
           Text(
-            '${wObj['description'] ?? ''}',
+            '${widget.wObj['description'] ?? ''}',
           ),
           SizedBox(height: 10),
           GestureDetector(
             onTap: () {
-              // Navigate to comments pagez
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CommentPage(post: widget.wObj, postId: widget.postId),
+                ),
+              );
             },
             child: Text(
-              'View all ${wObj['totalComments'] ?? 0} comments',
+              'View all ${widget.wObj['totalComments'] ?? 0} comments',
             ),
           ),
         ],

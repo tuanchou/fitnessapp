@@ -1,38 +1,33 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness/view/social/comments/widget/reply_comment_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness/service/app_colors.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class CommentMainWidget extends StatefulWidget {
-  final Map<String, dynamic> post;
-  final String postId;
+class ReplyCommentWidget extends StatefulWidget {
+  final Map<String, dynamic>? commentData;
+  final String? postId;
+  final String? commentId;
 
-  const CommentMainWidget({
-    Key? key,
-    required this.post,
-    required this.postId,
-  }) : super(key: key);
+  const ReplyCommentWidget(
+      {Key? key, this.commentData, this.postId, this.commentId})
+      : super(key: key);
 
   @override
-  State<CommentMainWidget> createState() => _CommentMainWidgetState();
+  State<ReplyCommentWidget> createState() => _ReplyCommentWidgetState();
 }
 
-class _CommentMainWidgetState extends State<CommentMainWidget> {
-  final TextEditingController _descriptionController = TextEditingController();
+class _ReplyCommentWidgetState extends State<ReplyCommentWidget> {
   final TextEditingController _replyDescriptionController =
       TextEditingController();
   @override
   void dispose() {
-    _descriptionController.dispose();
     _replyDescriptionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final String postId = widget.postId;
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
@@ -40,7 +35,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
         centerTitle: true,
         elevation: 0,
         title: const Text(
-          "Comments",
+          "Reply Comments",
           style: TextStyle(
               color: AppColors.blackColor,
               fontSize: 16,
@@ -59,7 +54,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                 FutureBuilder<DocumentSnapshot>(
                   future: FirebaseFirestore.instance
                       .collection('user-info')
-                      .doc(widget.post['creatorUid'])
+                      .doc(widget.commentData?['username'])
                       .get(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,7 +107,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "${widget.post['description']}",
+                  "${widget.commentData?['description']}",
                   style: TextStyle(color: AppColors.blackColor),
                 ),
               ],
@@ -128,6 +123,8 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                   .collection('posts')
                   .doc(widget.postId)
                   .collection('comments')
+                  .doc(widget.commentId)
+                  .collection('replies')
                   .orderBy('createAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -152,10 +149,10 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                 return ListView.builder(
                   itemCount: snapshot.data?.docs.length ?? 0,
                   itemBuilder: (context, index) {
-                    var commentData = snapshot.data?.docs[index].data();
-                    String? commentId = snapshot.data?.docs[index].id;
-                    String idUser = commentData?['username'] ??
-                        ''; // Lấy iduser từ dữ liệu comment
+                    var replyData = snapshot.data?.docs[index].data();
+                    String? replyId = snapshot.data?.docs[index].id;
+                    String idUser = replyData?['username'] ?? '';
+                    ''; // Lấy iduser từ dữ liệu comment
 
                     return StreamBuilder(
                       stream: FirebaseFirestore.instance
@@ -180,13 +177,8 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                         String authorLabel = '';
 
                         // Kiểm tra xem người tạo bài viết có trong danh sách người bình luận không
-                        if (commentData?['username'] ==
-                            widget.post['creatorUid']) {
-                          authorLabel = 'Author';
-                        }
-
-                        bool _isCommentLiked =
-                            (commentData?['likes'] ?? []).contains(idUser);
+                        bool _isReplyLiked =
+                            (replyData?['likes'] ?? []).contains(idUser);
 
                         return ListTile(
                           title: Column(
@@ -210,7 +202,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                                         ),
                                         SizedBox(height: 5),
                                         Text(
-                                          commentData?['description'] ?? '',
+                                          replyData?['description'] ?? '',
                                           style: TextStyle(fontSize: 16),
                                         ),
                                       ],
@@ -219,36 +211,25 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                                 ],
                               ),
                               SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _toggleCommentLike(
-                                        commentId!, commentData),
-                                    child: Icon(
-                                      Icons.thumb_up,
-                                      color: _isCommentLiked
-                                          ? Colors.blue
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              ReplyCommentWidget(
-                                                  commentData: commentData,
-                                                  postId: postId,
-                                                  commentId: commentId),
-                                        ),
-                                      );
-                                    },
-                                    child: Icon(Icons.reply),
-                                  ),
-                                ],
-                              ),
+                              // Row(
+                              //   children: [
+                              //     GestureDetector(
+                              //       onTap: () =>
+                              //           _toggleCommentLike(replyId!, replyData),
+                              //       child: Icon(
+                              //         Icons.thumb_up,
+                              //         color: _isReplyLiked
+                              //             ? Colors.blue
+                              //             : Colors.black,
+                              //       ),
+                              //     ),
+                              //     SizedBox(width: 10),
+                              //     GestureDetector(
+                              //       onTap: () {},
+                              //       child: Icon(Icons.reply),
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                           leading: CircleAvatar(
@@ -256,9 +237,9 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
                                 NetworkImage(userData?['Avatar'] ?? ''),
                           ),
                           subtitle: Text(
-                            commentData?['createAt'] != null
+                            replyData?['createAt'] != null
                                 ? timeago
-                                    .format(commentData?['createAt']!.toDate())
+                                    .format(replyData?['createAt']!.toDate())
                                 : "",
                             style: TextStyle(
                               color: Colors.grey,
@@ -318,7 +299,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
             SizedBox(width: 10),
             Expanded(
               child: TextFormField(
-                controller: _descriptionController,
+                controller: _replyDescriptionController,
                 style: TextStyle(color: AppColors.blackColor),
                 decoration: InputDecoration(
                   border: InputBorder.none,
@@ -328,7 +309,7 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
               ),
             ),
             GestureDetector(
-              onTap: _createComment,
+              onTap: _createReply,
               child: Icon(
                 Icons.send,
               ),
@@ -339,48 +320,67 @@ class _CommentMainWidgetState extends State<CommentMainWidget> {
     );
   }
 
-  void _createComment() {
+  void _createReply() {
     User? currentUser = FirebaseAuth.instance.currentUser;
-
-    // Thêm bình luận vào collection 'comments' của bài viết
     FirebaseFirestore.instance
         .collection('posts')
         .doc(widget.postId)
         .collection('comments')
+        .doc(widget.commentId)
+        .collection('replies')
         .add({
-      'description': _descriptionController.text,
+      'description': _replyDescriptionController.text,
       'createAt': Timestamp.now(),
-      'totalReplays': 0,
-      'likes': [],
       'username': currentUser?.uid,
     }).then((_) {
-      // Sau khi thêm bình luận thành công, cập nhật số lượng bình luận trong tài liệu 'post'
-      FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .collection('comments')
-          .get()
-          .then((comments) {
-        // Đếm số lượng bình luận
-        int totalComments = comments.docs.length;
-
-        // Cập nhật giá trị totalComments trong tài liệu post
-        FirebaseFirestore.instance
-            .collection('posts')
-            .doc(widget.postId)
-            .update({'totalComments': totalComments}).then((_) {
-          // Xóa nội dung trong ô nhập bình luận sau khi đã thêm bình luận thành công và cập nhật totalComments
-          _descriptionController.clear();
-        }).catchError((error) {
-          print('Error updating post document: $error');
-        });
-      }).catchError((error) {
-        print('Error getting comments: $error');
-      });
+      _replyDescriptionController.clear();
     }).catchError((error) {
-      print('Error adding comment: $error');
+      print('Error adding reply: $error');
     });
   }
+
+  // void _createComment() {
+  //   User? currentUser = FirebaseAuth.instance.currentUser;
+
+  //   // Thêm bình luận vào collection 'comments' của bài viết
+  //   FirebaseFirestore.instance
+  //       .collection('posts')
+  //       .doc(widget.postId)
+  //       .collection('comments')
+  //       .add({
+  //     'description': _replyDescriptionController.text,
+  //     'createAt': Timestamp.now(),
+  //     'totalReplays': 0,
+  //     'likes': [],
+  //     'username': currentUser?.uid,
+  //   }).then((_) {
+  //     // Sau khi thêm bình luận thành công, cập nhật số lượng bình luận trong tài liệu 'post'
+  //     FirebaseFirestore.instance
+  //         .collection('posts')
+  //         .doc(widget.postId)
+  //         .collection('comments')
+  //         .get()
+  //         .then((comments) {
+  //       // Đếm số lượng bình luận
+  //       int totalComments = comments.docs.length;
+
+  //       // Cập nhật giá trị totalComments trong tài liệu post
+  //       FirebaseFirestore.instance
+  //           .collection('posts')
+  //           .doc(widget.postId)
+  //           .update({'totalComments': totalComments}).then((_) {
+  //         // Xóa nội dung trong ô nhập bình luận sau khi đã thêm bình luận thành công và cập nhật totalComments
+  //         _replyDescriptionController.clear();
+  //       }).catchError((error) {
+  //         print('Error updating post document: $error');
+  //       });
+  //     }).catchError((error) {
+  //       print('Error getting comments: $error');
+  //     });
+  //   }).catchError((error) {
+  //     print('Error adding comment: $error');
+  //   });
+  // }
 
   void _toggleCommentLike(String commentId, Map<String, dynamic>? commentData) {
     User? currentUser = FirebaseAuth.instance.currentUser;

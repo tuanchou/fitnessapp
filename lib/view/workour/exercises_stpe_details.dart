@@ -313,7 +313,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                         borderRadius: BorderRadius.circular(20),
                         child: Videoplayerwidget(
                           videoUrl: currentData["_videoUrl"],
-                          autoPlay: false,
+                          autoPlay: true,
                         ),
                       )
                     : Placeholder(), // Placeholder hoặc widget khác để hiển thị khi không có video
@@ -421,7 +421,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                   children: [
                     if (timeInSeconds == 0)
                       Text(
-                        "Hoàn thành bài tập",
+                        "Exercise Completed",
                         style: TextStyle(
                           color: AppColors.grayColor,
                           fontSize: 24,

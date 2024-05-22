@@ -26,6 +26,8 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
   DateTime? _dob;
   bool? gender;
   File? _pickedImage;
@@ -52,6 +54,8 @@ class _ProfileState extends State<Profile> {
             _nameController.text = userData['Name'] ?? '';
             _addressController.text = userData['Address'] ?? '';
             _emailController.text = userData['Email'] ?? '';
+            _heightController.text = userData['Height'] ?? '';
+            _weightController.text = userData['Weight'] ?? '';
             if (userData['DoB'] != null) {
               _dob = DateTime.parse(userData['DoB']);
             }
@@ -71,6 +75,8 @@ class _ProfileState extends State<Profile> {
     if (user != null) {
       final String newName = _nameController.text;
       final String newAddress = _addressController.text;
+      final String newHeight = _heightController.text;
+      final String newWeight = _weightController.text;
       final String newDoB = _dob?.toIso8601String() ?? '';
 
       try {
@@ -87,7 +93,9 @@ class _ProfileState extends State<Profile> {
           'Address': newAddress,
           'DoB': newDoB,
           'Gender': gender,
-          'Avatar': imageUrl
+          'Avatar': imageUrl,
+          'Weight': newWeight,
+          'Height': newHeight,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -168,7 +176,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 SizedBox(height: 25),
                 RoundTextField(
-                  hintText: "Your Weight",
+                  hintText: "Your Email",
                   icon: "icons/message_icon.png",
                   textInputType: TextInputType.emailAddress,
                   textEditingController: _emailController,
@@ -176,7 +184,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 SizedBox(height: 15),
                 RoundTextField(
-                  hintText: "Your Height",
+                  hintText: "Your Name",
                   icon: "icons/user_icon.png",
                   textInputType: TextInputType.text,
                   textEditingController: _nameController,
@@ -270,12 +278,14 @@ class _ProfileState extends State<Profile> {
                   hintText: "Your Weight",
                   icon: "icons/weight_icon.png",
                   textInputType: TextInputType.text,
+                  textEditingController: _weightController,
                 ),
                 SizedBox(height: 15),
                 RoundTextField(
                   hintText: "Your Height",
                   icon: "icons/swap_icon.png",
                   textInputType: TextInputType.text,
+                  textEditingController: _heightController,
                 ),
                 SizedBox(height: 15),
                 RoundGradientButton(

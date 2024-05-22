@@ -5,6 +5,7 @@ import 'package:fitness/view/forgot_password.dart';
 import 'package:fitness/service/reusable_widgets.dart';
 import 'package:fitness/view/signup.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -140,7 +141,9 @@ class _MyLoginState extends State<LogIn> {
                         email: _emailTextController.text,
                         password: _passwordTextController.text,
                       );
-
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setBool('isLoggedIn', true);
                       Navigator.pushNamed(context, 'dashboard');
                     } catch (e) {
                       if (e is FirebaseAuthException) {

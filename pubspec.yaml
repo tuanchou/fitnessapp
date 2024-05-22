@@ -54,6 +54,7 @@ dependencies:
   flutter_bloc: ^8.1.5
   calendar_agenda: ^0.0.2+3
   timeago: ^3.6.1
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

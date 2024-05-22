@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/service/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness/view/workour/workour_detail_view.dart';
@@ -70,14 +72,47 @@ class WorkoutRow extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkoutDetailView(
-                            collectionName: fieldName,
+                      // Kiểm tra nếu giá trị là 100%
+                      if (wObj[fieldName] == 100) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Note"),
+                              content: Text(
+                                  "You have completed $fieldName, do you want to reset it?"),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text("No"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text("Yes"),
+                                  onPressed: () {
+                                    String userId =
+                                        FirebaseAuth.instance.currentUser!.uid;
+                                    deleteUserProgressAndSubcollection(
+                                        fieldName, context, userId);
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        // Nếu giá trị không phải 100%, điều hướng đến trang WorkoutDetailView
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WorkoutDetailView(
+                              collectionName: fieldName,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                     icon: Image.asset(
                       "icons/next_icon.png",
@@ -92,5 +127,39 @@ class WorkoutRow extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  Future<void> deleteUserProgressAndSubcollection(
+      String fieldName, BuildContext context, String userId) async {
+    try {
+      // Delete the field from the user's document in the userProgress collection
+      await FirebaseFirestore.instance
+          .collection('userProgress')
+          .doc(userId)
+          .update({
+        fieldName: FieldValue.delete(),
+      });
+
+      // Delete the subcollection
+      QuerySnapshot subcollectionSnapshot = await FirebaseFirestore.instance
+          .collection('userProgress')
+          .doc(userId)
+          .collection(fieldName)
+          .get();
+      for (DocumentSnapshot doc in subcollectionSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Show a snackbar to indicate successful deletion
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data has been deleted successfully')),
+      );
+    } catch (error) {
+      // Handle any errors that occur during the process
+      print('Error deleting data: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred while deleting data')),
+      );
+    }
   }
 }

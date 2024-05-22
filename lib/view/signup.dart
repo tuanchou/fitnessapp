@@ -139,6 +139,8 @@ class _MyRegisterState extends State<SignUp> {
                               'Address': null,
                               'DoB': null,
                               'Gender': null,
+                              'Height': null,
+                              'Weight': null,
                               'Avatar':
                                   'https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-default-avatar-profile-icon-social-media-user-vector-portrait-176194876.jpg',
                             }).then((_) {
